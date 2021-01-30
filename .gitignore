@@ -2,3 +2,5 @@
 *.swp
 img
 __pycache__
+member.csv
+model.sav
