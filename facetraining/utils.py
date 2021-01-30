@@ -85,7 +85,7 @@ def save_model(svc, output):
     if not parent.exists():
         parent.mkdir(parents=True)
         with outpath.open('wb') as fd:
-        pickle.dump(svc, fd)
+            pickle.dump(svc, fd)
 
 
 def load_model(modelfile):
