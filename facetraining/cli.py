@@ -12,7 +12,8 @@ from facetraining.utils import (list_categories,
                                 save_categories,
                                 load_categories,
                                 find_face_locations,
-                                predict_all_face)
+                                predict_all_face,
+                                save_result_image)
 
 
 @click.group(invoke_without_command=True)
@@ -54,10 +55,17 @@ def learn(output, image_base_dir):
               help='学習済みモデルファイル')
 @click.option('-l',
               '--memberlist',
+              default='member.csv',
+              show_default=True,
+              type=click.Path(exists=True),
               help='メンバー名のCSV')
+@click.option('-o',
+              '--output',
+              help='結果画像の出力',
+              type=click.Path())
 @click.argument('pred_image_path',
                 type=click.Path(exists=True))
-def predict(model, memberlist, pred_image_path):
+def predict(model, memberlist, pred_image_path, output):
     '''
     学習済みモデルを使って予測
     '''
@@ -69,6 +77,13 @@ def predict(model, memberlist, pred_image_path):
     for result in result_list:
         rate, member = max(zip(result, categories))
         click.echo(f'{member}: {round(rate*100, 2)}')
+    if output is not None:
+        save_result_image(image,
+                          output,
+                          face_locations,
+                          result_list,
+                          categories)
+        click.echo(f'output: {output}')
 
 
 @cli.command()

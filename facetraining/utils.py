@@ -8,6 +8,7 @@ import face_recognition
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC
+from PIL import Image, ImageDraw
 
 
 def list_categories(image_base_dir):
@@ -128,10 +129,22 @@ def predict_all_face(svc, face_locations, image):
     return result
 
 
-def _slice_faceimage(image, face_location):
+def save_result_image(image, output, face_locations, results, categories):
+    pil_image = Image.fromarray(image)
+    pil_image_draw = ImageDraw.Draw(pil_image)
+    for face_location, result in zip(face_locations, results):
+        rate, member = max(zip(result, categories))
+        location = _convert_pil_location(face_location)
+        pil_image_draw.rectangle(location)
+        label = f'{member}[{round(rate*100)}%]'
+        pil_image_draw.text(location[:2], label)
+    pil_image.save(output)
+
+
+def _convert_pil_location(face_location):
     x1, y1, x2, y2 = face_location
     xstart = min(x1, x2)
     xend = max(x1, x2)
     ystart = min(y1, y2)
     yend = max(y1, y2)
-    return image[xstart:xend, ystart:yend]
+    return (ystart, xstart, yend, xend)
