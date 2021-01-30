@@ -1,4 +1,5 @@
 import click
+import shutil
 
 from facetraining.utils import (list_categories,
                                 load_image,
@@ -67,4 +68,40 @@ def predict(model, memberlist, pred_image_path):
 
 
 @cli.command()
-def 
+@click.option('-m',
+              '--model',
+              default='model.sav',
+              show_default=True,
+              type=click.Path(exists=True),
+              help='学習済みモデルファイル')
+@click.option('-l',
+              '--memberlist',
+              help='メンバー名のCSV')
+@click.option('-o',
+              '--output-base-dir',
+              type=click.Path(exists=True),
+              required=True,
+              help='出力先のディレクトリ')
+@click.option('--move',
+              help='copyではなくmoveする',
+              is_flag=True,
+              default=False,
+              show_default=True)
+@click.argument('image_base_dir',
+                type=click.Path(exists=True))
+def sort(model, memberlist, output_base_dir, image_base_dir, move):
+    '''
+    学習済みモデルをつかって画像を仕分ける
+    '''
+    svc = load_model(model)
+    pathlist = find_all_image_path(image_base_dir)
+    categories = load_categories(memberlist)
+    for path in pathlist:
+        click.echo(f'{path}')
+        cnv_list = load_image(path)
+        result = svc.predict_proba(cnv_list)[0]
+        rate, member = max(zip(result, categories))
+        click.echo(f'{round(rate*100, 2)}%: {member}')
+        topath = Path(image_base_dir, member, path.name)
+        click.echo(f'{path} -> {topath}')
+        shutil.copy(path, topath)
