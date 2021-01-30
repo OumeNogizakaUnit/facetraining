@@ -56,7 +56,7 @@ def load_image(imagepath, feature_num=128):
     image = face_recognition.load_image_file(imagepath)
     face_location = (0, image.shape[1], image.shape[0], 0)
     cnv = face_recognition.face_encodings(image,
-            known_face_locations=[face_location])
+                                          known_face_locations=[face_location])
     return cnv
 
 
