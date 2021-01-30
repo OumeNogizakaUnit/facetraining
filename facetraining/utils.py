@@ -42,7 +42,7 @@ def make_model(pathlist, categories):
 def make_facenet_matrics(imagepathlist, feature_num=128):
     cnv_list = None
     for imagepath in tqdm(imagepathlist):
-        cnv = load_image(imagepath, feature_num)
+        cnv = load_face_image(imagepath, feature_num)
         if cnv_list is None:
             cnv_list = cnv[0]
         else:
@@ -52,8 +52,8 @@ def make_facenet_matrics(imagepathlist, feature_num=128):
     return reshape_cnv_list
 
 
-def load_image(imagepath, feature_num=128):
-    image = face_recognition.load_image_file(imagepath)
+def load_face_image(imagepath, feature_num=128):
+    image = load_image(imagepath)
     face_location = (0, image.shape[1], image.shape[0], 0)
     cnv = face_recognition.face_encodings(image,
                                           known_face_locations=[face_location])
@@ -110,3 +110,28 @@ def load_categories(csvfile):
         reader = csv.reader(fd)
         memberlist = next(reader)
     return memberlist
+
+
+def load_image(imagepath):
+    return face_recognition.load_image_file(imagepath)
+
+
+def find_face_locations(image):
+    face_locations = face_recognition.face_locations(image)
+    return face_locations
+
+
+def predict_all_face(svc, face_locations, image):
+    cnv = face_recognition.face_encodings(image,
+                                          known_face_locations=face_locations)
+    result = svc.predict_proba(cnv)
+    return result
+
+
+def _slice_faceimage(image, face_location):
+    x1, y1, x2, y2 = face_location
+    xstart = min(x1, x2)
+    xend = max(x1, x2)
+    ystart = min(y1, y2)
+    yend = max(y1, y2)
+    return image[xstart:xend, ystart:yend]

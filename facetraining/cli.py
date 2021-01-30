@@ -4,12 +4,15 @@ from pathlib import Path
 
 from facetraining.utils import (list_categories,
                                 load_image,
+                                load_face_image,
                                 find_all_image_path,
                                 make_model,
                                 save_model,
                                 load_model,
                                 save_categories,
-                                load_categories)
+                                load_categories,
+                                find_face_locations,
+                                predict_all_face)
 
 
 @click.group(invoke_without_command=True)
@@ -59,14 +62,13 @@ def predict(model, memberlist, pred_image_path):
     学習済みモデルを使って予測
     '''
     svc = load_model(model)
-    cnv_list = load_image(pred_image_path)
-    result = svc.predict_proba(cnv_list)[0]
-    if memberlist is not None:
-        categories = load_categories(memberlist)
-        for member, rate in zip(categories, result):
-            click.echo(f'{member:>20}: {round(rate*100, 2)}%')
-    else:
-        click.echo(result)
+    image = load_image(pred_image_path)
+    categories = load_categories(memberlist)
+    face_locations = find_face_locations(image)
+    result_list = predict_all_face(svc, face_locations, image)
+    for result in result_list:
+        rate, member = max(zip(result, categories))
+        click.echo(f'{member}: {round(rate*100, 2)}')
 
 
 @cli.command()
@@ -100,7 +102,7 @@ def sort(model, memberlist, output_base_dir, image_base_dir, move):
     categories = load_categories(memberlist)
     for path in pathlist:
         click.echo(f'{path}')
-        cnv_list = load_image(path)
+        cnv_list = load_face_image(path)
         result = svc.predict_proba(cnv_list)[0]
         rate, member = max(zip(result, categories))
         click.echo(f'{round(rate*100, 2)}%: {member}')
