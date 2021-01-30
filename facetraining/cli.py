@@ -20,7 +20,8 @@ def cli(ctx):
 @click.option('-o',
               '--output',
               default='model.sav',
-              show_default=True)
+              show_default=True,
+              help='学習済みモデル出力先')
 @click.argument('image_base_dir', 
                 type=click.Path(exists=True))
 def learn(output, image_base_dir):
@@ -43,7 +44,6 @@ def learn(output, image_base_dir):
               default='model.sav',
               show_default=True,
               type=click.Path(exists=True),
-              required=True,
               help='学習済みモデルファイル')
 @click.option('-l',
               '--memberlist',
@@ -63,3 +63,7 @@ def predict(model, memberlist, pred_image_path):
             click.echo(f'{member:>20}: {round(rate*100, 2)}%')
     else:
         click.echo(result)
+
+
+@cli.command()
+def 

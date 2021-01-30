@@ -84,7 +84,8 @@ def save_model(svc, output):
     parent = outpath.parent
     if not parent.exists():
         parent.mkdir(parents=True)
-    with outpath.open('wb') as fd:
+        if ctx.invoked_subcommand is None:
+        print ctx.get_help()with outpath.open('wb') as fd:
         pickle.dump(svc, fd)
 
 
