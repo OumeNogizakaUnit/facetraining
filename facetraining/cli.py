@@ -1,5 +1,6 @@
 import click
 import shutil
+from pathlib import Path
 
 from facetraining.utils import (list_categories,
                                 load_image,
@@ -79,7 +80,7 @@ def predict(model, memberlist, pred_image_path):
               help='メンバー名のCSV')
 @click.option('-o',
               '--output-base-dir',
-              type=click.Path(exists=True),
+              type=click.Path(),
               required=True,
               help='出力先のディレクトリ')
 @click.option('--move',
@@ -102,6 +103,12 @@ def sort(model, memberlist, output_base_dir, image_base_dir, move):
         result = svc.predict_proba(cnv_list)[0]
         rate, member = max(zip(result, categories))
         click.echo(f'{round(rate*100, 2)}%: {member}')
-        topath = Path(image_base_dir, member, path.name)
+        todir = Path(output_base_dir, member)
+        if todir.exists() is False:
+            click.echo(f'mkdir {todir}')
+            todir.mkdir(parents=True)
+        fromdirname = path.parent.name
+        tofilename = f'{fromdirname}_{member}_{path.name}'
+        topath = Path(todir, tofilename)
         click.echo(f'{path} -> {topath}')
         shutil.copy(path, topath)
