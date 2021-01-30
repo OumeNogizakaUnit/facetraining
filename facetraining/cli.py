@@ -36,6 +36,7 @@ def learn(output, image_base_dir):
     save_model(svc, output)
     click.echo(f'save module: {output}')
     save_categories(categories, 'member.csv')
+    click.echo(f'finish!!!')
 
 
 @cli.command()
